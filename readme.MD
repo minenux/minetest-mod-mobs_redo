@@ -1,8 +1,12 @@
 
 MOBS REDO for MINETEST
+======================
 
 Built from PilzAdam's original Simple Mobs with additional mobs by KrupnoPavel, Zeg9, ExeterDad and AspireMint.
 
+
+Information
+-----------
 
 This mod contains the API only for adding your own mobs into the world, so please use the additional modpacks to add animals, monsters etc.
 
@@ -10,7 +14,7 @@ This mod contains the API only for adding your own mobs into the world, so pleas
 https://forum.minetest.net/viewtopic.php?f=11&t=9917
 
 
-Crafts:
+### Crafts:
 
  - Nametag (paper, black dye, string) can be used right-click on a tamed mob to give them a name.
  - Nets can be used to right-click tamed mobs to pick them up and place inside inventory as a spawn egg.
@@ -22,7 +26,8 @@ Crafts:
 Lucky Blocks: 9
 
 
-Changelog:
+## Changelog:
+
 - 1.56 - Added arrow_override function to mob definition to tweak arrow entity settings, tamed monsters no longer despawn when outside loaded map area.
 - 1.55 - Add 'peaceful_player' privelage and setting so mobs don't attack specific players (thanks sfence), add support for MarkBu's pathfinder mod, remove need for default mod
 - 1.54 - Simplified animal breeding function, added editable settings (thanks Wuzzy), Child mobs now take 20 mins to grow up, reverted to simple mob spawning with setting to use area checks, on_flop added, air_damage added.
