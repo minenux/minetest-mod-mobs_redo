@@ -270,6 +270,8 @@ local check_for = function(look_for, look_inside)
 
 		for _, str in pairs(look_inside) do
 
+			if not str then goto continue end
+
 			if str == look_for then
 				return true
 			end
@@ -282,6 +284,8 @@ local check_for = function(look_for, look_inside)
 					return true
 				end
 			end
+
+			::continue::
 		end
 	end
 
