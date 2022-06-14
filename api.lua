@@ -28,7 +28,7 @@ local use_cmi = minetest.global_exists("cmi")
 
 mobs = {
 	mod = "redo",
-	version = "20220314",
+	version = "20220514",
 	intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {}
 }
@@ -550,6 +550,7 @@ local new_line_of_sight = function(self, pos1, pos2, stepsize)
 	return false
 end
 
+
 -- check line of sight using raycasting (thanks Astrobe)
 local ray_line_of_sight = function(self, pos1, pos2)
 
@@ -918,18 +919,7 @@ function mob_class:check_for_death(cmi_cause)
 			self.health = self.hp_max
 		end
 
-		-- backup nametag so we can show health stats
---		if not self.nametag2 then
---			self.nametag2 = self.nametag or ""
---		end
-
---		if show_health
---		and (cmi_cause and cmi_cause.type == "punch") then
-
---			self.htimer = 2
---			self.nametag = "♥ " .. self.health .. " / " .. self.hp_max
-			self:update_tag()
---		end
+		self:update_tag()
 
 		return false
 	end
@@ -1058,7 +1048,7 @@ end
 -- is mob facing a cliff
 function mob_class:is_at_cliff()
 
-	if self.fear_height == 0 then -- 0 for no falling protection!
+	if self.driver or self.fear_height == 0 then -- 0 for no falling protection!
 		return false
 	end
 
@@ -1102,14 +1092,7 @@ function mob_class:do_env_damage()
 		self.htimer = self.htimer - 1
 	end
 
-	-- reset nametag after showing health stats
---	if self.htimer < 1 and self.nametag2 then
-
---		self.nametag = self.nametag2
---		self.nametag2 = nil
-
-		self:update_tag()
---	end
+	self:update_tag()
 
 	local pos = self.object:get_pos() ; if not pos then return end
 
@@ -1708,6 +1691,7 @@ end
 
 
 local pathfinder_mod = minetest.get_modpath("pathfinder")
+
 -- path finding and smart mob routine by rnd,
 -- line_of_sight and other edits by Elkien3
 function mob_class:smart_mobs(s, p, dist, dtime)
@@ -2393,11 +2377,22 @@ function mob_class:do_states(dtime)
 		else
 			self:set_velocity(self.walk_velocity)
 
+			-- figure out which animation to use while in motion
 			if self:flight_check()
 			and self.animation
 			and self.animation.fly_start
 			and self.animation.fly_end then
-				self:set_animation("fly")
+
+				local on_ground = minetest.registered_nodes[self.standing_on].walkable
+				local in_water = minetest.registered_nodes[self.standing_in].groups.water
+
+				if on_ground and in_water then
+					self:set_animation("fly")
+				elseif on_ground then
+					self:set_animation("walk")
+				else
+					self:set_animation("fly")
+				end
 			else
 				self:set_animation("walk")
 			end
@@ -3017,7 +3012,7 @@ function mob_class:on_punch(hitter, tflp, tool_capabilities, dir, damage)
 		if self:check_for_death({type = "punch", puncher = hitter, hot = hot}) then
 			return true
 		end
-	end -- END if damage
+	end
 
 	-- knock back effect (only on full punch)
 	if self.knock_back and tflp >= punch_interval then
@@ -3159,8 +3154,6 @@ function mob_class:mob_staticdata()
 			tmp[_] = self[_]
 		end
 	end
-
---print('===== '..self.name..'\n'.. dump(tmp)..'\n=====\n')
 
 	return minetest.serialize(tmp)
 end
@@ -3372,8 +3365,7 @@ function mob_class:mob_expire(pos, dtime)
 				end
 			end
 
---			minetest.log("action",
---				S("lifetimer expired, removed @1", self.name))
+--			minetest.log("action", S("lifetimer expired, removed @1", self.name))
 
 			effect(pos, 15, "tnt_smoke.png", 2, 4, 2, 0)
 
@@ -3400,9 +3392,9 @@ function mob_class:on_step(dtime, moveresult)
 	-- early warning check, if no yaw then no entity, skip rest of function
 	if not yaw then return end
 
-	-- get node at foot level every quarter second
 	self.node_timer = (self.node_timer or 0) + dtime
 
+	-- get nodes above and below foot level every 1/4 second
 	if self.node_timer > 0.25 then
 
 		self.node_timer = 0
@@ -3700,7 +3692,7 @@ minetest.register_entity(name, setmetatable({
 
 	get_staticdata = function(self)
 		return self:mob_staticdata(self)
-	end,
+	end
 
 }, mob_class_meta))
 
@@ -4502,7 +4494,7 @@ end
 function mobs:capture_mob(self, clicker, chance_hand, chance_net,
 		chance_lasso, force_take, replacewith)
 
-	if not self --self.child
+	if not self
 	or not clicker:is_player()
 	or not clicker:get_inventory() then
 		return false
@@ -4706,15 +4698,6 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 		if self.health >= self.hp_max then
 
 			self.health = self.hp_max
-
---			if self.htimer < 1 then
-
---				minetest.chat_send_player(clicker:get_player_name(),
---					S("@1 at full health (@2)",
---					self.name:split(":")[2], tostring(self.health)))
-
---				self.htimer = 5
---			end
 		end
 
 		self.object:set_hp(self.health)
@@ -4722,7 +4705,6 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 		-- make children grow quicker
 		if self.child == true then
 
---			self.hornytimer = self.hornytimer + 20
 			-- deduct 10% of the time to adulthood
 			self.hornytimer = math.floor(self.hornytimer + (
 					(CHILD_GROW_TIME - self.hornytimer) * 0.1))
