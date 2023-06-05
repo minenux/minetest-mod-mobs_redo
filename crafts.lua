@@ -53,6 +53,7 @@ minetest.register_tool("mobs:lasso", {
 })
 
 if minetest.get_modpath("farming") then
+
 	minetest.register_craft({
 		output = "mobs:lasso",
 		recipe = {
@@ -73,6 +74,7 @@ minetest.register_tool("mobs:net", {
 })
 
 if minetest.get_modpath("farming") then
+
 	minetest.register_craft({
 		output = "mobs:net",
 		recipe = {
@@ -148,7 +150,9 @@ minetest.register_craft({
 
 
 -- make sure we can register fences
-if minetest.get_modpath("default") and default.register_fence then
+local mod_def = minetest.get_modpath("default")
+
+if mod_def and default.register_fence then
 
 -- mob fence (looks like normal fence but collision is 2 high)
 default.register_fence("mobs:fence_wood", {
@@ -156,7 +160,7 @@ default.register_fence("mobs:fence_wood", {
 	texture = "default_wood.png",
 	material = "default:fence_wood",
 	groups = {choppy = 2, oddly_breakable_by_hand = 2, flammable = 2},
-	sounds = default.node_sound_wood_defaults(),
+	sounds = mod_def and default.node_sound_wood_defaults(),
 	collision_box = {
 		type = "fixed",
 		fixed = {
@@ -174,7 +178,7 @@ minetest.register_node("mobs:fence_top", {
 	paramtype = "light",
 	is_ground_content = false,
 	groups = {choppy = 2, oddly_breakable_by_hand = 2, flammable = 2},
-	sounds = default.node_sound_wood_defaults(),
+	sounds = mod_def and default.node_sound_wood_defaults(),
 	node_box = {
 		type = "fixed",
 		fixed = {-0.2, -0.5, -0.2, 0.2, 0, 0.2}
@@ -244,6 +248,7 @@ minetest.register_craft({
 
 -- this tool spawns same mob and adds owner, protected, nametag info
 -- then removes original entity, this is used for fixing any issues.
+-- also holding sneak while punching mob lets you change texture name.
 
 local tex_obj
 
@@ -353,23 +358,49 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 end)
 
 
--- Meat Block (thanks to painterlypack.net for allowing me to use these textures)
+-- Meat Block
 minetest.register_node("mobs:meatblock", {
 	description = S("Meat Block"),
 	tiles = {"mobs_meat_top.png", "mobs_meat_bottom.png", "mobs_meat_side.png"},
 	paramtype2 = "facedir",
 	groups = {choppy = 1, oddly_breakable_by_hand = 1, flammable = 2},
-	sounds = default and default.node_sound_leaves_defaults(),
+	sounds = mod_def and default.node_sound_leaves_defaults(),
 	on_place = minetest.rotate_node,
 	on_use = minetest.item_eat(20)
 })
 
 minetest.register_craft({
 	output = "mobs:meatblock",
---	type = "shapeless",
 	recipe = {
 		{"group:food_meat", "group:food_meat", "group:food_meat"},
 		{"group:food_meat", "group:food_meat", "group:food_meat"},
 		{"group:food_meat", "group:food_meat", "group:food_meat"}
 	}
+})
+
+-- Meat Block (raw)
+minetest.register_node("mobs:meatblock_raw", {
+	description = S("Raw Meat Block"),
+	tiles = {"mobs_meat_raw_top.png", "mobs_meat_raw_bottom.png", "mobs_meat_raw_side.png"},
+	paramtype2 = "facedir",
+	groups = {choppy = 1, oddly_breakable_by_hand = 1, flammable = 2},
+	sounds = mod_def and default.node_sound_leaves_defaults(),
+	on_place = minetest.rotate_node,
+	on_use = minetest.item_eat(20)
+})
+
+minetest.register_craft({
+	output = "mobs:meatblock_raw",
+	recipe = {
+		{"group:food_meat_raw", "group:food_meat_raw", "group:food_meat_raw"},
+		{"group:food_meat_raw", "group:food_meat_raw", "group:food_meat_raw"},
+		{"group:food_meat_raw", "group:food_meat_raw", "group:food_meat_raw"}
+	}
+})
+
+minetest.register_craft({
+	type = "cooking",
+	output = "mobs:meatblock",
+	recipe = "mobs:meatblock_raw",
+	cooktime = 30
 })

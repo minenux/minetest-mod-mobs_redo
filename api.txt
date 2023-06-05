@@ -6,6 +6,17 @@ Welcome to the world of mobs in minetest and hopefully an easy guide to defining
 your own mobs and having them appear in your worlds.
 
 
+Quick Note
+----------
+
+Since the mobs redo api checks for nodes around the mob to function, it relies on a
+default node incase anything goes wrong, so in the default game this is default:dirt
+but for any custom game please make sure the following line is registered with your
+preferred dirt node of choice:
+
+minetest.register_alias("mapgen_dirt", "mymod:my_dirt_node")
+
+
 Registering Mobs
 ----------------
 
@@ -60,6 +71,7 @@ functions needed for the mob to work properly which contains the following:
                    mob when melee attacking.
    'damage_group'  group in which damage is dealt, dedaults to "fleshy".
    'damage_texture_modifier' applies texture modifier on hit e.g "^[brighten"
+                   or default when enabled is "^[colorize:#c9900070".
    'knock_back'    when true has mobs falling backwards when hit, the greater
                    the damage the more they move back.
    'fear_height'   is how high a cliff or edge has to be before the mob stops
@@ -78,6 +90,7 @@ functions needed for the mob to work properly which contains the following:
                    level is between the min and max values below
    'light_damage_min' minimum light value when mob is affected (default: 14)
    'light_damage_max' maximum light value when mob is affected (default: 15)
+                      When set to 16 then only natural light will kill mob.
    'suffocation'   when > 0 mobs will suffocate inside solid blocks and will be
                    hurt by the value given every second (0 to disable).
    'floats'        when set to 1 mob will float in water, 0 has them sink.
@@ -138,6 +151,9 @@ functions needed for the mob to work properly which contains the following:
                          arrow/fireball appears on mob.
    'specific_attack'     has a table of entity names that mob can also attack
                          e.g. {"player", "mobs_animal:chicken"}.
+   'friendly_fire`       when set to false, mobs will not be able to harm other
+                         mobs of the same type with friendly fire arrows.
+                         Defaults to true.
    'runaway_from'        contains a table with mob names to run away from, add
                          "player" to list to runaway from player also.
    'ignore_invisibility' When true mob will still be able to see and attack
@@ -237,6 +253,9 @@ functions needed for the mob to work properly which contains the following:
       'shoot_start'  shooting animation.
       'shoot_end'
       'shoot_speed'
+      'injured_start' when hit or damaged > 1 hp (if not set then 'walk' is used)
+      'injured_end'
+      'injured_speed'
       'die_start'    death animation
       'die_end'
       'die_speed'
@@ -290,11 +309,9 @@ Custom Definition Functions
 Along with the above mob registry settings we can also use custom functions to
 enhance mob functionality and have them do many interesting things:
 
-   'on_die'         a function that is called when the mob is killed the
-                    parameters are (self, pos)
    'on_rightclick'  its same as in minetest.register_entity()
    'on_blast'       is called when an explosion happens near mob when using TNT
-                    functions, parameters are (object, damage) and returns
+                    functions, parameters are (damage) and returns
                     (do_damage, do_knockback, drops)
    'on_spawn'       is a custom function that runs on mob spawn with 'self' as
                     variable, return true at end of function to run only once.
@@ -335,6 +352,8 @@ for each mob.
    'self.child_texture' contains mob child texture when growing up
    'self.base_texture'  contains current skin texture which was randomly
                         selected from textures list
+   'self.texture_mods'  contains a list of textures to overlay above the mobs
+                        base texture (used for horse saddle)
    'self.gotten'        this is used for obtaining milk from cow and wool from
                         sheep
    'self.horny'         when animal fed enough it is set to true and animal can
@@ -348,6 +367,10 @@ for each mob.
    'self.order'         set to "follow" or "stand" so that npc will follow owner
                         or stand it's ground
    'self.nametag'       contains the name of the mob which it can show above
+   'self.pause_timer'   used to stop mob thinking when punched so that knockback
+                        can take effect.
+   'self.disable_falling' currently used on spider mob when climbing walls, stops
+                          the mob from experiencing gravity when true.
    'self.state'         Current mob state.
                         "stand": no movement (except turning around)
                         "walk": walk or move around aimlessly
@@ -356,6 +379,12 @@ for each mob.
                         "flop": bounce around aimlessly
                                 (for swimming mobs that have stranded)
                         "die": during death
+    'self.standing_on'  Node name mob is standing on.
+    'self.standing_in'  Node name mob is standing inside.
+    'self.looking_at'   Node name in front of mob.
+    'self.looking_above'Node name in front/above mob.
+    'self.facing_fence' True if mob facing node containing "wall", "fence", "gate"
+                        in it's name.
 
 
 Adding Mobs in World
@@ -526,10 +555,12 @@ Explosion Function
 
 mobs:explosion(pos, radius) -- DEPRECATED!!!  use mobs:boom() instead
 
-mobs:boom(self, pos, radius)
+mobs:boom(self, pos, radius, damage_radius, texture)
    'self' mob entity
    'pos' centre position of explosion
    'radius' radius of explosion (typically set to 3)
+   'damage_radius' radius of damage around explosion
+   'texture' particle texture during explosion, defaults to "tnt_smoke.png"
 
 This function generates an explosion which removes nodes in a specific radius
 and damages any entity caught inside the blast radius.  Protection will limit
@@ -702,14 +733,29 @@ This function returns true if the node name given is harmful to the mob (mob_obj
 it is mainly used when a mob is near a node it has to avoid.
 
 
+Looting Level
+-------------
+
+If a tool is used with 'looting_level' defined under tool_capabilities then mobs can drop
+extra items per level up to a maximum of 3 levels.  'looting_level' can also be read from
+the tools own meta to override the default.
+
+
 External Settings for "minetest.conf"
 ------------------------------------
 
+   'mob_node_timer_interval' How often mobs get nodes around them (0.25 is default)
+                             for every 1/4 second.
+   'mob_main_timer_interval' How often mobs run main functions (1.0 is default) for
+                             every one second.
    'enable_damage'          if true monsters will attack players (default is true)
    'only_peaceful_mobs'     if true only animals will spawn in game (default is
                             false)
+   'mobs_attack_creatura'   When True mobs redo mobs will attack Creatura mod mobs.
    'mobs_disable_blood'     if false blood effects appear when mob is hit (default
                             is false)
+   'mob_hit_effect'         False by default, when True and mobs are hit then
+                            damage_texture_modifier is used to highlight mob.
    'mobs_spawn_protected'   if set to false then mobs will not spawn in protected
                             areas (default is true)
    'mobs_spawn_monster_protected'   if set to false then monsters will not spawn in
@@ -720,8 +766,6 @@ External Settings for "minetest.conf"
                             spawn number e.g. mobs_animal:cow = 1000,5
    'mob_difficulty'         sets difficulty level (health and hit damage
                             multiplied by this number), defaults to 1.0.
-   'mob_show_health'        if false then punching mob will not show health status
-                            (true by default)
    'mob_chance_multiplier'  multiplies chance of all mobs spawning and can be set
                             to 0.5 to have mobs spawn more or 2.0 to spawn less.
                             e.g.  1 in 7000 * 0.5 = 1 in 3500 so better odds of
@@ -738,6 +782,17 @@ External Settings for "minetest.conf"
                             mob for obstructions before spawning, otherwise it
                             defaults to checking the height of the mob only.
    'mob_smooth_rotate'      Enables smooth rotation when mobs turn by default.
+   'mob_height_fix'         Enabled by default, increases smaller mob heights so they wont
+                            glitch through certain nodes.
+   'mob_pathfinding_enable'     Enable pathfinding.
+   'mob_pathfinder_enable'      Use pathfinder mod if available.
+   'mob_pathfinding_stuck_timeout'      How long before stuck mobs start searching. (default 3.0)
+   'mob_pathfinding_stuck_path_timeout'     How long will mob follow path before giving up. (default 5.0)
+   'mob_pathfinding_algorithm'  Which pathfinding algorithm to use Dijkstra (default), A*_noprefetch (AStar_noprefetch) or A* (AStar)
+                            (A* names differ cause Minetest doesn´t allow "*" in settings)
+   'mob_pathfinding_searchdistance'     max search distance from search positions (default 16)
+   'mob_pathfinding_max_jump'   max jump height for pathfinding (default 4)
+   'mob_pathfinding_max_drop'   max drop height for pathfinding (default 6)
 
 Players can override the spawn chance for each mob registered by adding a line
 to their minetest.conf file with a new value, the lower the value the more each
