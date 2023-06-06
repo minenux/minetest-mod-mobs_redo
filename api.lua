@@ -27,7 +27,7 @@ local use_cmi = minetest.global_exists("cmi")
 
 mobs = {
 	mod = "redo",
-	version = "20230527",
+	version = "20230606",
 	intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {}
 }
@@ -926,7 +926,7 @@ local function remove_mob(self, decrease)
 
 	self.object:remove()
 
-	if decrease and active_limit > 0 then
+	if decrease and active_limit > 1 then
 		active_mobs = active_mobs - 1
 
 		if active_mobs < 0 then
