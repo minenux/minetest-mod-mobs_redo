@@ -305,6 +305,8 @@ local function check_for(look_for, look_inside)
 		for _, str in pairs(look_inside) do
 
 			if not str then goto continue end
+			if not str or not str.find then print("Every node list (fly_in, follow, specific_attack or runaway_from) should contain strings, but entry '" .. _ .. "' is a " .. type(str) .. ".") end
+			if not str.find then goto continue end
 
 			if str then
 				if str:find("group:") then
@@ -506,7 +508,7 @@ local function line_of_sight(self, pos1, pos2, stepsize)
 	-- It continues to advance in the line of sight in search of a real
 	-- obstruction which counts as 'walkable' nodebox.
 	while minetest.registered_nodes[nn]
-	and minetest.registered_nodes[nn].walkable == false do
+	and (minetest.registered_nodes[nn].walkable == false) do
 
 		-- Check if you can still move forward
 		if td < ad + stepsize then
@@ -527,6 +529,53 @@ local function line_of_sight(self, pos1, pos2, stepsize)
 		end
 
 		ad = ad + stepsize
+
+		-- scan again
+		r, pos = minetest.line_of_sight(npos1, pos2, stepsize)
+
+		if r == true then return true end
+
+		-- New Nodename found
+		nn = minetest.get_node(pos).name
+	end
+
+	return false
+end
+
+
+-- check line of sight (by BrunoMine, tweaked by Astrobe)
+local function new_line_of_sight(self, pos1, pos2, stepsize)
+
+	if not pos1 or not pos2 then return end
+
+	stepsize = stepsize or 1
+
+	local stepv = vmultiply(vdirection(pos1, pos2), stepsize)
+
+	local s, pos = minetest.line_of_sight(pos1, pos2, stepsize)
+
+	-- normal walking and flying mobs can see you through air
+	if s == true then return true end
+
+	-- New pos1 to be analyzed
+	local npos1 = {x = pos1.x, y = pos1.y, z = pos1.z}
+
+	local r, pos = minetest.line_of_sight(npos1, pos2, stepsize)
+
+	-- Checks the return
+	if r == true then return true end
+
+	-- Nodename found
+	local nn = minetest.get_node(pos).name
+
+	-- It continues to advance in the line of sight in search of a real
+	-- obstruction which counts as 'walkable' nodebox.
+	while minetest.registered_nodes[nn]
+	and (minetest.registered_nodes[nn].walkable == false) do
+
+		npos1 = vadd(npos1, stepv)
+
+		if get_distance(npos1, pos2) < stepsize then return true end
 
 		-- scan again
 		r, pos = minetest.line_of_sight(npos1, pos2, stepsize)
@@ -879,6 +928,10 @@ local function remove_mob(self, decrease)
 
 	if decrease and active_limit > 0 then
 		active_mobs = active_mobs - 1
+
+		if active_mobs < 0 then
+			active_mobs = 0
+		end
 	end
 --print("-- active mobs: " .. active_mobs .. " / " .. active_limit)
 end
@@ -1086,6 +1139,11 @@ end
 
 -- environmental damage (water, lava, fire, light etc.)
 function mob_class:do_env_damage()
+
+	-- feed/tame text timer (so mob 'full' messages dont spam chat)
+	if self.htimer > 0 then
+		self.htimer = self.htimer - 1
+	end
 
 	self:update_tag()
 
@@ -1926,16 +1984,15 @@ end
 local function is_peaceful_player(player)
 
 	-- main setting enabled
-	if peaceful_player_enabled then
-		return true
-	end
+	if peaceful_player_enabled and player:is_player() then
 
-	local player_name = player:get_player_name()
+		local player_name = player:get_player_name()
 
-	-- player priv enabled
-	if player_name
-	and minetest.check_player_privs(player_name, "peaceful_player") then
-		return true
+		-- player priv enabled
+		if player_name
+		and minetest.check_player_privs(player_name, "peaceful_player") then
+			return true
+		end
 	end
 
 	return false
@@ -2126,13 +2183,14 @@ function mob_class:follow_flop()
 
 		for n = 1, #players do
 
-			if players[n]
-			and not is_invisible(self, players[n]:get_player_name())
-			and get_distance(players[n]:get_pos(), s) < self.view_range then
-
-				self.following = players[n]
-
-				break
+			if players[n] then
+				if players[n]:is_player() then
+					if not is_invisible(self, players[n]:get_player_name())
+					and get_distance(players[n]:get_pos(), s) < self.view_range then
+						self.following = players[n]
+						break
+					end
+				end
 			end
 		end
 	end
