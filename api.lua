@@ -1141,11 +1141,6 @@ end
 -- environmental damage (water, lava, fire, light etc.)
 function mob_class:do_env_damage()
 
-	-- feed/tame text timer (so mob 'full' messages dont spam chat)
-	if self.htimer > 0 then
-		self.htimer = self.htimer - 1
-	end
-
 	self:update_tag()
 
 	local pos = self.object:get_pos() ; if not pos then return end
