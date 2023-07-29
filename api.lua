@@ -30,7 +30,7 @@ mobs = {
 	version = "20230726",
 	intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
-	node_ice = "default:ice"
+	node_ice = "default:ice",
 	node_snow = minetest.registered_aliases["mapgen_snow"] or "default:snow" or "mcl_core:snow",
 	node_dirt = minetest.registered_aliases["mapgen_dirt"] or "default:dirt" or "mcl_core:dirt"
 }
