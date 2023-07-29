@@ -2341,9 +2341,9 @@ function mob_class:do_states(dtime)
 		local s = self.object:get_pos()
 		local grps = {}
 
-		if self.water_damage > 0 then table.insert(grps, "group:water", "group:igniter") end
+		if self.water_damage > 0 then table.insert(grps, "group:water") end
 		if self.fire_damage > 0 then table.insert(grps, "group:fire") end
-		if self.lava_damage > 0 then table.insert(grps, "group:lava", "group:igniter") end
+		if self.lava_damage > 0 then table.insert(grps, "group:lava") end
 
 		local lp = minetest.find_node_near(s, 1, grps)
 
