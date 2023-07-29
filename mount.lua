@@ -13,8 +13,17 @@ or not minetest.get_modpath("player_api") then
 end
 ]]
 
-local is_50 = minetest.get_modpath("player_api") -- 5.x compatibility
+local is_pa = minetest.get_modpath("player_api") -- 5.x compatibility
 local is_mc2 = minetest.get_modpath("mcl_mobs") -- MineClone2 compatibility
+
+-- are we a real player ?
+local function is_player(player)
+
+	if player and type(player) == "userdata" and minetest.is_player(player) then
+		return true
+	end
+end
+
 
 local abs, cos, floor, sin, sqrt, pi =
 		math.abs, math.cos, math.floor, math.sin, math.sqrt, math.pi
@@ -89,7 +98,9 @@ end
 
 local function force_detach(player)
 
-	local attached_to = player and player:get_attach()
+	if not is_player(player) then return end
+
+	local attached_to = player:get_attach()
 
 	if not attached_to then
 		return
@@ -105,7 +116,7 @@ local function force_detach(player)
 
 	local name = player:get_player_name()
 
-	if is_50 then
+	if is_pa then
 		player_api.player_attached[name] = false
 		player_api.set_animation(player, "stand", 30)
 	elseif is_mc2 then
@@ -175,16 +186,9 @@ local function find_free_pos(pos)
 end
 
 
--- are we a real player ?
-local function is_player(player)
-
-	if player and type(player) == "userdata" and minetest.is_player(player) then
-		return true
-	end
-end
-
-
 function mobs.attach(entity, player)
+
+	if not is_player(player) then return end
 
 	entity.player_rotation = entity.player_rotation or {x = 0, y = 0, z = 0}
 	entity.driver_attach_at = entity.driver_attach_at or {x = 0, y = 0, z = 0}
@@ -204,7 +208,7 @@ function mobs.attach(entity, player)
 
 	force_detach(player)
 
-	if is_50 then
+	if is_pa then
 		player_api.player_attached[player:get_player_name()] = true
 	elseif is_mc2 then
 		mcl_player.player_attached[player:get_player_name()] = true
@@ -226,7 +230,7 @@ function mobs.attach(entity, player)
 
 		if is_player(player) then
 
-			if is_50 then
+			if is_pa then
 				player_api.set_animation(player, "sit", 30)
 			elseif is_mc2 then
 				mcl_player.player_set_animation(player, "sit_mount" , 30)
@@ -246,7 +250,7 @@ function mobs.detach(player)
 
 	minetest.after(0.1, function()
 
-		if player and player:is_player() then
+		if is_player(player) then
 
 			local pos = find_free_pos(player:get_pos())
 

@@ -30,8 +30,9 @@ mobs = {
 	version = "20230726",
 	intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
-	node_snow = minetest.registered_aliases["mapgen_snow"] or "mcl_core:snow",
-	node_dirt = minetest.registered_aliases["mapgen_dirt"] or "mcl_core:dirt"
+	node_ice = "default:ice"
+	node_snow = minetest.registered_aliases["mapgen_snow"] or "default:snow" or "mcl_core:snow",
+	node_dirt = minetest.registered_aliases["mapgen_dirt"] or "default:dirt" or "mcl_core:dirt"
 }
 mobs.fallback_node = mobs.node_dirt
 
@@ -2340,9 +2341,9 @@ function mob_class:do_states(dtime)
 		local s = self.object:get_pos()
 		local grps = {}
 
-		if self.water_damage > 0 then table.insert(grps, "group:water") end
+		if self.water_damage > 0 then table.insert(grps, "group:water", "group:igniter") end
 		if self.fire_damage > 0 then table.insert(grps, "group:fire") end
-		if self.lava_damage > 0 then table.insert(grps, "group:lava") end
+		if self.lava_damage > 0 then table.insert(grps, "group:lava", "group:igniter") end
 
 		local lp = minetest.find_node_near(s, 1, grps)
 
@@ -2353,7 +2354,7 @@ function mob_class:do_states(dtime)
 				lp = minetest.find_nodes_in_area_under_air(
 					{x = s.x - 5, y = s.y , z = s.z - 5},
 					{x = s.x + 5, y = s.y + 2, z = s.z + 5},
-					{"group:cracky", "group:crumbly", "group:choppy", "group:solid"})
+					{"group:cracky", "group:crumbly", "group:choppy", "group:solid", "group:stone", "group:sand", node_ice, node_snowblock})
 
 				-- did we find land?
 				if lp and #lp > 0 then

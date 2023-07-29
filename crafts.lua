@@ -4,20 +4,20 @@ local mc2 = minetest.get_modpath("mcl_core")
 
 -- recipe items
 local items = {
-	paper = mc2 and "mcl_core:paper" or "default:paper",
-	dye_black = mc2 and "mcl_dye:black" or "dye:black",
-	string = mc2 and "mcl_mobitems:string" or "farming:string",
-	stick = mc2 and "mcl_core:stick" or "default:stick",
-	diamond = mc2 and "mcl_core:diamond" or "default:diamond",
-	steel_ingot = mc2 and "mcl_core:iron_ingot" or "default:steel_ingot",
-	gold_block = mc2 and "mcl_core:goldblock" or "default:goldblock",
-	diamond_block = mc2 and "mcl_core:diamondblock" or "default:diamondblock",
-	stone = mc2 and "mcl_core:stone" or "default:stone",
-	mese_crystal = mc2 and "mcl_core:gold_ingot" or "default:mese_crystal",
-	wood = mc2 and "mcl_core:wood" or "default:wood",
-	fence_wood = mc2 and "group:fence_wood" or "default:fence_wood",
-	meat_raw = mc2 and "mcl_mobitems:beef" or "group:food_meat_raw",
-	meat_cooked = mc2 and "mcl_mobitems:cooked_beef" or "group:food_meat",
+	paper = (mc2 and "mcl_core:paper") or "default:paper",
+	dye_black = (mc2 and "mcl_dye:black") or "dye:black",
+	string = (mc2 and "mcl_mobitems:string") or "farming:string",
+	stick = (mc2 and "mcl_core:stick") or "default:stick",
+	diamond = (mc2 and "mcl_core:diamond") or "default:diamond",
+	steel_ingot = (mc2 and "mcl_core:iron_ingot") or "default:steel_ingot",
+	gold_block = (mc2 and "mcl_core:goldblock") or "default:goldblock",
+	diamond_block = (mc2 and "mcl_core:diamondblock") or "default:diamondblock",
+	stone = (mc2 and "mcl_core:stone") or "default:stone",
+	mese_crystal = (mc2 and "mcl_core:gold_ingot") or "default:mese_crystal",
+	wood = (mc2 and "mcl_core:wood") or "default:wood",
+	fence_wood = (mc2 and "group:fence_wood") or "default:fence_wood",
+	meat_raw = (mc2 and "mcl_mobitems:beef") or "group:food_meat_raw",
+	meat_cooked = (mc2 and "mcl_mobitems:cooked_beef") or "group:food_meat",
 }
 
 -- name tag
@@ -27,12 +27,14 @@ minetest.register_craftitem("mobs:nametag", {
 	groups = {flammable = 2, nametag = 1}
 })
 
-minetest.register_craft({
-	output = "mobs:nametag",
-	recipe = {
-		{ items.paper, items.dye_black, items.string }
-	}
-})
+if minetest.get_modpath("dye") and minetest.get_modpath("farming") then
+	minetest.register_craft({
+		output = "mobs:nametag",
+		recipe = {
+			{ items.paper, items.dye_black, items.string }
+		}
+	})
+end
 
 -- leather
 minetest.register_craftitem("mobs:leather", {
@@ -71,14 +73,17 @@ minetest.register_tool("mobs:lasso", {
 	groups = {flammable = 2}
 })
 
-minetest.register_craft({
-	output = "mobs:lasso",
-	recipe = {
-		{ items.string, "", items.string},
-		{ "", items.diamond, "" },
-		{ items.string, "", items.string }
-	}
-})
+if minetest.get_modpath("farming") then
+
+	minetest.register_craft({
+		output = "mobs:lasso",
+		recipe = {
+			{ items.string, "", items.string},
+			{ "", items.diamond, "" },
+			{ items.string, "", items.string }
+		}
+	})
+end
 
 minetest.register_alias("mobs:magic_lasso", "mobs:lasso")
 
@@ -89,14 +94,17 @@ minetest.register_tool("mobs:net", {
 	groups = {flammable = 2}
 })
 
-minetest.register_craft({
-	output = "mobs:net",
-	recipe = {
-		{ items.stick, "", items.stick },
-		{ items.stick, "", items.stick },
-		{ items.string, items.stick, items.string }
-	}
-})
+if minetest.get_modpath("farming") then
+
+	minetest.register_craft({
+		output = "mobs:net",
+		recipe = {
+			{ items.stick, "", items.stick },
+			{ items.stick, "", items.stick },
+			{ items.string, items.stick, items.string }
+		}
+	})
+end
 
 -- shears (right click to shear animal)
 minetest.register_tool("mobs:shears", {
