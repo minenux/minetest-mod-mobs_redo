@@ -37,6 +37,8 @@ Zeg9, ExeterDad and AspireMint.
 * Refactored do_jump and added get_nodes function
 * Many bug fixes and tweaks to improve performance
 * Added 'mobs_attack_creatura' setting so that monsters can attack Creatura mobs
+* Nodes can be added to 'runaway_from' table
+* Better Mineclone2 compatibility with api, items and recipes
 
 ### Version 1.56
 
