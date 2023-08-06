@@ -268,7 +268,7 @@ end
 -- are we a real player ?
 local function is_player(player)
 
-	if player and type(player) == "userdata" and minetest.is_player(player) then
+	if player and type(player) == "userdata" then
 		return true
 	end
 end
