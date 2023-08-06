@@ -2355,7 +2355,7 @@ function mob_class:do_states(dtime)
 				lp = minetest.find_nodes_in_area_under_air(
 					{x = s.x - 5, y = s.y , z = s.z - 5},
 					{x = s.x + 5, y = s.y + 2, z = s.z + 5},
-					{"group:cracky", "group:crumbly", "group:choppy", "group:solid", "group:stone", "group:sand", node_ice, node_snowblock})
+					{"group:cracky", "group:crumbly", "group:choppy", "group:solid", "group:stone", "group:sand", mobs.node_ice, mobs.node_snow})
 
 				-- did we find land?
 				if lp and #lp > 0 then
