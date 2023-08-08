@@ -27,7 +27,7 @@ local use_cmi = minetest.global_exists("cmi")
 
 mobs = {
 	mod = "redo",
-	version = "20230805",
+	version = "20230807",
 	intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -3665,7 +3665,7 @@ function mobs:register_mob(name, def)
 		collisionbox[5] = collisionbox[2] + 0.99
 	end
 
-minetest.register_entity(name, setmetatable({
+minetest.register_entity(":" .. name, setmetatable({
 
 	stepheight = def.stepheight,
 	name = name,
@@ -4238,7 +4238,7 @@ function mobs:register_arrow(name, def)
 
 	if not name or not def then return end -- errorcheck
 
-	minetest.register_entity(name, {
+	minetest.register_entity(":" .. name, {
 
 		physical = def.physical or false,
 		collide_with_objects = def.collide_with_objects or false,
