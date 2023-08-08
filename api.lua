@@ -3665,10 +3665,10 @@ function mobs:register_mob(name, def)
 		collisionbox[5] = collisionbox[2] + 0.99
 	end
 
-minetest.register_entity(":" .. name, setmetatable({
+minetest.register_entity(name, setmetatable({
 
 	stepheight = def.stepheight,
-	name = name,
+	name = (name:find(":") and name or ":"..name),
 	type = def.type,
 	attack_type = def.attack_type,
 	fly = def.fly,
@@ -4238,7 +4238,7 @@ function mobs:register_arrow(name, def)
 
 	if not name or not def then return end -- errorcheck
 
-	minetest.register_entity(":" .. name, {
+	minetest.register_entity( (name:find(":") and name or ":"..name) , {
 
 		physical = def.physical or false,
 		collide_with_objects = def.collide_with_objects or false,
@@ -4910,7 +4910,7 @@ function mobs:alias_mob(old_name, new_name)
 	minetest.register_alias(old_name, new_name)
 
 	-- entity
-	minetest.register_entity(":" .. old_name, {
+	minetest.register_entity( (old_name:find(":") and old_name or ":"..old_name) , {
 
 		physical = false, static_save = false,
 
