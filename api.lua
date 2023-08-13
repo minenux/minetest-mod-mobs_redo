@@ -33,7 +33,7 @@ local use_mc2 = minetest.get_modpath("mcl_core")
 -- Global
 mobs = {
 	mod = "redo",
-	version = "20230809",
+	version = "20230813",
 	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -3433,7 +3433,7 @@ function mob_class:mob_expire(pos, dtime)
 				end
 			end
 
---			minetest.log("action", S("lifetimer expired, removed @1", self.name))
+--			minetest.log("action", "lifetimer expired, removed " .. self.name)
 
 			effect(pos, 15, "tnt_smoke.png", 2, 4, 2, 0)
 
@@ -4833,10 +4833,10 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 		minetest.show_formspec(name, "mobs_nametag",
 			"size[8,4]" ..
 			"field[0.5,1;7.5,0;name;" ..
-			esc(S("Enter name:")) ..
+			esc(FS("Enter name:")) ..
 			";" .. tag .. "]" ..
 			"button_exit[2.5,3.5;3,1;mob_rename;" ..
-			esc(S("Rename")) .. "]")
+			esc(FS("Rename")) .. "]")
 
 		return true
 	end
@@ -4851,9 +4851,9 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 			end
 
 			minetest.chat_send_player(clicker:get_player_name(),
-					S("@1 follows:\n- @2",
-					self.name:split(":")[2],
-					table.concat(self.follow, "\n- ")))
+					S("@1 follows:",
+					self.name:split(":")[2]) .. "\n" ..
+					table.concat(self.follow, "\n- "))
 		end
 	end
 
