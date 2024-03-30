@@ -4,13 +4,17 @@ MOBS REDO for MINETEST
 This mod contains the API only for adding your own mobs into the world, so
 please use the additional modpacks to add animals, monsters, and npcs.
 
-https://forum.minetest.net/viewtopic.php?f=11&t=9917
+https://codeberg.org/minenux/minetest-mod-mobs_redo
 
 Information
 -----------
 
 Built from PilzAdam's original Simple Mobs with additional mobs by KrupnoPavel,
 Zeg9, ExeterDad and AspireMint.
+
+This mod is special one already compatible with older engines.. with backported 
+patches to work both in multicraft, minetest, mineclone and finetest, becouse 
+the tenplus1 only works in last minetest, admins will not wants to constant upgrades!
 
 ## Crafts
 

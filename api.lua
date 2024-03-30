@@ -33,7 +33,7 @@ local use_mc2 = minetest.get_modpath("mcl_core")
 -- Global
 mobs = {
 	mod = "redo",
-	version = "20231022",
+	version = "20231105",
 	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -114,7 +114,8 @@ local pathfinder_enable = settings:get_bool("mob_pathfinder_enable") or true
 local pathfinding_stuck_timeout = tonumber(
 		settings:get("mob_pathfinding_stuck_timeout")) or 3.0
 -- how long will mob follow path before giving up
-local pathfinding_stuck_path_timeout = tonumber(settings:get("mob_pathfinding_stuck_path_timeout")) or 5.0
+local pathfinding_stuck_path_timeout = tonumber(
+		settings:get("mob_pathfinding_stuck_path_timeout")) or 5.0
 -- which algorithm to use, Dijkstra(default) or A*_noprefetch or A*
 -- fix settings not allowing "*"
 local pathfinding_algorithm = settings:get("mob_pathfinding_algorithm") or "Dijkstra"
@@ -228,21 +229,20 @@ local mob_class_meta = {__index = mob_class}
 -- play sound
 function mob_class:mob_sound(sound)
 
-	if sound then
+	if not sound then return end
 
-		-- higher pitch for a child
-		local pitch = self.child and 1.5 or 1.0
+	-- higher pitch for a child
+	local pitch = self.child and 1.5 or 1.0
 
-		-- a little random pitch to be different
-		pitch = pitch + random(-10, 10) * 0.005
+	-- a little random pitch to be different
+	pitch = pitch + random(-10, 10) * 0.005
 
-		minetest.sound_play(sound, {
-			object = self.object,
-			gain = 1.0,
-			max_hear_distance = self.sounds.distance,
-			pitch = pitch
-		}, true)
-	end
+	minetest.sound_play(sound, {
+		object = self.object,
+		gain = 1.0,
+		max_hear_distance = (self.sounds and self.sounds.distance) or 10,
+		pitch = pitch
+	}, true)
 end
 
 
@@ -2339,6 +2339,21 @@ function mob_class:dogswitch(dtime)
 end
 
 
+-- stop attack
+function mob_class:stop_attack()
+
+	self.attack = nil
+	self.following = nil
+	self.v_start = false
+	self.timer = 0
+	self.blinktimer = 0
+	self.path.way = nil
+	self:set_velocity(0)
+	self.state = "stand"
+	self:set_animation("stand", true)
+end
+
+
 -- execute current state (stand, walk, run, attacks)
 function mob_class:do_states(dtime)
 
@@ -2517,17 +2532,26 @@ function mob_class:do_states(dtime)
 
 --print(" ** stop attacking **", self.name, self.health, dist, self.view_range)
 
-			self.attack = nil
-			self.following = nil
-			self.v_start = false
-			self.timer = 0
-			self.blinktimer = 0
-			self.path.way = nil
-			self:set_velocity(0)
-			self.state = "stand"
-			self:set_animation("stand", true)
+			self:stop_attack()
 
 			return
+		end
+
+		-- check enemy is in sight
+		local in_sight = self:line_of_sight(
+			{x = s.x, y = s.y + 0.5, z = s.z},
+			{x = p.x, y = p.y + 0.5, z = p.z})
+
+		-- stop attacking when enemy not seen for 11 seconds
+		if not in_sight then
+
+			self.target_time_lost = (self.target_time_lost or 0) + dtime
+
+			if self.target_time_lost > self.attack_patience then
+				self:stop_attack()
+			end
+		else
+			self.target_time_lost = 0
 		end
 
 		if self.attack_type == "explode" then
@@ -2544,7 +2568,7 @@ function mob_class:do_states(dtime)
 			-- start timer when in reach and line of sight
 			if not self.v_start
 			and dist <= self.reach
-			and self:line_of_sight(s, p, 2) then
+			and in_sight then
 
 				self.v_start = true
 				self.timer = 0
@@ -2556,7 +2580,7 @@ function mob_class:do_states(dtime)
 			-- stop timer if out of reach or direct line of sight
 			elseif self.allow_fuse_reset
 			and self.v_start
-			and (dist > self.reach or not self:line_of_sight(s, p, 2)) then
+			and (dist > self.reach or not in_sight) then
 
 --print("=== explosion timer stopped")
 
@@ -2590,10 +2614,8 @@ function mob_class:do_states(dtime)
 					self.blinktimer = 0
 
 					if self.blinkstatus then
-
 						self.object:set_texture_mod(self.texture_mods)
 					else
-
 						self.object:set_texture_mod(self.texture_mods .. "^[brighten")
 					end
 
@@ -2606,10 +2628,9 @@ function mob_class:do_states(dtime)
 
 					local pos = self.object:get_pos()
 
-					-- dont damage anything if area protected or next to waterpathfinding_max_jump
+					-- dont damage anything if area protected or next to water
 					if minetest.find_node_near(pos, 1, {"group:water"})
 					or minetest.is_protected(pos, "") then
-
 						node_break_radius = 1
 					end
 
@@ -4452,7 +4473,6 @@ end
 
 
 -- Register spawn eggs
-
 -- Note: This also introduces the “spawn_egg” group:
 -- * spawn_egg=1: Spawn egg (generic mob, no metadata)
 -- * spawn_egg=2: Spawn egg (captured/tamed mob, metadata)
