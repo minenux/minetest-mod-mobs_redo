@@ -33,7 +33,7 @@ local use_mc2 = minetest.get_modpath("mcl_core")
 -- Global
 mobs = {
 	mod = "redo",
-	version = "20230930",
+	version = "20231005",
 	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -3237,10 +3237,11 @@ function mob_class:mob_staticdata()
 		self.serialized_cmi_components = cmi.serialize_components(self._cmi_components)
 	end
 
-	-- move existing variables to new initial_properties table for future compatibility
-	if not self.initial_properties then
+	-- move existing variables to new table for future compatibility
+	-- using self.initial_properties lost some variables when backing up?!?
+	if not self.backup_properties then
 
-		self.initial_properties = {
+		self.backup_properties = {
 			hp_max = self.hp_max,
 			physical = self.physical,
 			collisionbox = self.collisionbox,
@@ -4797,7 +4798,7 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 		if self.child == true then
 
 			-- deduct 10% of the time to adulthood
-			self.hornytimer = math.floor(self.hornytimer + (
+			self.hornytimer = floor(self.hornytimer + (
 					(CHILD_GROW_TIME - self.hornytimer) * 0.1))
 --print ("====", self.hornytimer)
 			return true
