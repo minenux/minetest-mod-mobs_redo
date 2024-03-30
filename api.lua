@@ -33,7 +33,7 @@ local use_mc2 = minetest.get_modpath("mcl_core")
 -- Global
 mobs = {
 	mod = "redo",
-	version = "20230816",
+	version = "20230927",
 	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -1587,6 +1587,8 @@ function mob_class:breed()
 					-- make sure baby is actually there
 					if ent2 then
 
+						textures = self.base_texture
+
 						-- using specific child texture (if found)
 						if self.child_texture then
 							textures = self.child_texture[1]
@@ -2485,6 +2487,11 @@ function mob_class:do_states(dtime)
 			self:set_velocity(0)
 			self.state = "stand"
 			self:set_animation("stand")
+
+			-- try to turn so we are not stuck
+			yaw = yaw + random(-1, 1) * 1.5
+			yaw = self:set_yaw(yaw, 4)
+
 		else
 			self:set_velocity(self.run_velocity)
 			self:set_animation("walk")
@@ -3929,6 +3936,8 @@ function mobs:add_mob(pos, def)
 	if not ent then
 --print("[mobs] entity not found " .. def.name)
 		return false
+	else
+		effect(pos, 15, "tnt_smoke.png", 1, 2, 2, 15, 5)
 	end
 
 	if def.child then
@@ -4760,11 +4769,7 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 
 		-- increase health
 		self.health = self.health + 4
-
-		if self.health >= self.hp_max then
-
-			self.health = self.hp_max
-		end
+		if self.health >= self.hp_max then self.health = self.hp_max end
 
 		self.object:set_hp(self.health)
 
@@ -4821,8 +4826,7 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 
 	-- if mob has been tamed you can name it with a nametag
 	if item:get_name() == "mobs:nametag"
-	and (name == self.owner
-	or minetest.check_player_privs(name, "protection_bypass")) then
+	and (name == self.owner or minetest.check_player_privs(name, "protection_bypass")) then
 
 		-- store mob and nametag stack in external variables
 		mob_obj[name] = self
@@ -4831,13 +4835,9 @@ function mobs:feed_tame(self, clicker, feed_count, breed, tame)
 		local tag = self.nametag or ""
 		local esc = minetest.formspec_escape
 
-		minetest.show_formspec(name, "mobs_nametag",
-			"size[8,4]" ..
-			"field[0.5,1;7.5,0;name;" ..
-			esc(FS("Enter name:")) ..
-			";" .. tag .. "]" ..
-			"button_exit[2.5,3.5;3,1;mob_rename;" ..
-			esc(FS("Rename")) .. "]")
+		minetest.show_formspec(name, "mobs_nametag", "size[8,4]"
+			.. "field[0.5,1;7.5,0;name;" .. esc(FS("Enter name:")) .. ";" .. tag .. "]"
+			.. "button_exit[2.5,3.5;3,1;mob_rename;" .. esc(FS("Rename")) .. "]")
 
 		return true
 	end
