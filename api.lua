@@ -33,7 +33,7 @@ local use_mc2 = minetest.get_modpath("mcl_core")
 -- Global
 mobs = {
 	mod = "redo",
-	version = "20231012",
+	version = "20231022",
 	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -4196,14 +4196,16 @@ function mobs:spawn_specific(name, nodes, neighbors, min_light, max_light, inter
 
 			local mob = minetest.add_entity(pos, name)
 
---		print("[mobs] Spawned " .. name .. " at "
---		.. minetest.pos_to_string(pos) .. " on "
---		.. node.name .. " near " .. neighbors[1])
-
 			if mob_log_spawn then
 
-				minetest.log("[MOBS] Spawned " .. name .. " at "
-					.. minetest.pos_to_string(pos))
+				local pos_string = pos and minetest.pos_to_string(pos) or ""
+
+				minetest.log(
+					"[MOBS] Spawned "
+					.. (name or "")
+					.. " at "
+					.. pos_string
+				)
 			end
 
 			if on_spawn and mob then
