@@ -1,4 +1,4 @@
-local MP = minetest.get_modpath(minetest.get_current_modname())
+local MP = minetest.get_modpath("mobs")
 -- Check for translation method
 local S
 
@@ -21,21 +21,28 @@ else
 		end
 	end
 end
+local FS = function(...) return minetest.formspec_escape(S(...)) end
+
 
 -- CMI support check
 local use_cmi = minetest.global_exists("cmi")
 
+-- MineClone2 check
+local use_mc2 = minetest.get_modpath("mcl_core")
+
+-- Global
 mobs = {
 	mod = "redo",
-	version = "20230807",
-	intllib = S,
+	version = "20230809",
+	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
-	node_snow = minetest.registered_aliases["mapgen_snow"] or "default:snow" or "mcl_core:snow",
-	node_dirt = minetest.registered_aliases["mapgen_dirt"] or "default:dirt" or "mcl_core:dirt"
+	node_snow = minetest.registered_aliases["mapgen_snow"]
+			or (use_mc2 and "mcl_core:snow") or "default:snow",
+	node_dirt = minetest.registered_aliases["mapgen_dirt"]
+			or (use_mc2 and "mcl_core:dirt") or "default:dirt"
 }
 mobs.fallback_node = mobs.node_dirt
-
 
 -- localize common functions
 local pi = math.pi

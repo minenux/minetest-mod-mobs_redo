@@ -1,8 +1,10 @@
 -- lib_mount by Blert2112 (edited by TenPlus1)
 
---[[ one of these is needed (for now) to ride mobs, otherwise no riding for you
-if not minetest.get_modpath("default")
-or not minetest.get_modpath("player_api") then
+local is_pa = minetest.get_modpath("player_api") -- 5.x compatibility
+local is_mc2 = minetest.get_modpath("mcl_mobs") -- MineClone2 check
+
+-- one of these is needed to ride mobs, otherwise no riding for you
+if not minetest.get_modpath("default") and not is_pa and not is_mc2 then
 
 	function mobs.attach() end
 	function mobs.detach() end
@@ -11,10 +13,6 @@ or not minetest.get_modpath("player_api") then
 
 	return
 end
-]]
-
-local is_pa = minetest.get_modpath("player_api") -- 5.x compatibility
-local is_mc2 = minetest.get_modpath("mcl_mobs") -- MineClone2 compatibility
 
 -- are we a real player ?
 local function is_player(player)
@@ -25,7 +23,7 @@ local function is_player(player)
 	return false
 end
 
-
+-- Localise some functions
 local abs, cos, floor, sin, sqrt, pi =
 		math.abs, math.cos, math.floor, math.sin, math.sqrt, math.pi
 
@@ -117,15 +115,17 @@ local function force_detach(player)
 
 	local name = player:get_player_name()
 
-	if is_pa then
-		player_api.player_attached[name] = false
-		player_api.set_animation(player, "stand", 30)
-	elseif is_mc2 then
+	if is_mc2 then
 		mcl_player.player_attached[player:get_player_name()] = false
 		mcl_player.player_set_animation(player, "stand", 30)
 	else
+		if is_pa then
+		player_api.player_attached[name] = false
+		player_api.set_animation(player, "stand", 30)
+		else
 		default.player_attached[name] = false
 		default.player_set_animation(player, "stand", 30)
+		end
 	end
 
 	player:set_eye_offset({x = 0, y = 0, z = 0}, {x = 0, y = 0, z = 0})
@@ -209,12 +209,14 @@ function mobs.attach(entity, player)
 
 	force_detach(player)
 
-	if is_pa then
-		player_api.player_attached[player:get_player_name()] = true
-	elseif is_mc2 then
+	if is_mc2 then
 		mcl_player.player_attached[player:get_player_name()] = true
 	else
+		if is_pa then
+		player_api.player_attached[player:get_player_name()] = true
+		else
 		default.player_attached[player:get_player_name()] = true
+		end
 	end
 
 	player:set_attach(entity.object, "", attach_at, entity.player_rotation)
@@ -231,13 +233,14 @@ function mobs.attach(entity, player)
 
 		if is_player(player) then
 
-			if is_pa then
-				player_api.set_animation(player, "sit", 30)
-			elseif is_mc2 then
+			if is_mc2 then
 				mcl_player.player_set_animation(player, "sit_mount" , 30)
 			else
+				if is_pa then
+				player_api.set_animation(player, "sit", 30)
+				else
 				default.player_set_animation(player, "sit", 30)
-			end
+				end
 		end
 	end)
 
