@@ -3703,7 +3703,7 @@ function mobs:register_mob(name, def)
 
 minetest.register_entity(name, setmetatable({
 
-	stepheight = def.stepheight,
+	stepheight = def.stepheight or 1.1,
 	name = (name:find(":") and name or ":"..name),
 	type = def.type,
 	attack_type = def.attack_type,
