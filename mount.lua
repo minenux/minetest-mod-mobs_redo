@@ -241,6 +241,7 @@ function mobs.attach(entity, player)
 				else
 				default.player_set_animation(player, "sit", 30)
 				end
+			end
 		end
 	end)
 
