@@ -4962,10 +4962,10 @@ function mobs:alias_mob(old_name, new_name)
 	end
 
 	-- spawn egg
-	minetest.register_alias(old_name, new_name)
+	minetest.register_alias( (old_name:find(":") and old_name or ":"..old_name), new_name)
 
 	-- entity
-	minetest.register_entity( (old_name:find(":") and old_name or ":"..old_name) , {
+	minetest.register_entity( ":"..old_name , {
 
 		physical = false, static_save = false,
 
