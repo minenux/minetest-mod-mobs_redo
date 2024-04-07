@@ -33,7 +33,7 @@ local use_mc2 = minetest.get_modpath("mcl_core")
 -- Global
 mobs = {
 	mod = "redo",
-	version = "20231105",
+	version = "20231106",
 	translate = S, intllib = S,
 	invis = minetest.global_exists("invisibility") and invisibility or {},
 	node_ice = "default:ice",
@@ -183,6 +183,7 @@ mobs.mob_class = {
 	walk_chance = 50,
 	stand_chance = 30,
 	attack_chance = 5,
+	attack_patience = 11
 	passive = false,
 	blood_amount = 5,
 	blood_texture = "mobs_blood.png",
@@ -1859,7 +1860,9 @@ function mob_class:smart_mobs(s, p, dist, dtime)
 			s.y = sground.y + 1
 		end
 
-		local p1 = self.attack:get_pos()
+		local p1 = self.attack and self.attack:get_pos()
+
+		if not p1 then return end
 
 		p1.x = floor(p1.x + 0.5)
 		p1.y = floor(p1.y + 0.5)
@@ -3782,6 +3785,7 @@ minetest.register_entity(name, setmetatable({
 	walk_chance = def.walk_chance,
 	stand_chance = def.stand_chance,
 	attack_chance = def.attack_chance,
+	attack_patience = def.attack_patience,
 	passive = def.passive,
 	knock_back = def.knock_back,
 	blood_amount = def.blood_amount,
@@ -4085,7 +4089,7 @@ function mobs:spawn_specific(name, nodes, neighbors, min_light, max_light, inter
 			pos, node, active_object_count, active_object_count_wider)
 
 		-- use instead of abm's chance setting when using lbm
-		if map_load and random(max(1, (chance * mob_chance_multiplier))) > 1 then
+		if map_load and random(max(1, (chance * mob_chance_multiplier/10))) > 1 then
 			return
 		end
 
@@ -4257,7 +4261,7 @@ function mobs:spawn_specific(name, nodes, neighbors, min_light, max_light, inter
 			nodenames = nodes,
 			neighbors = neighbors,
 			interval = interval,
-			chance = max(1, (chance * mob_chance_multiplier)),
+			chance = max(1, (chance * (mob_chance_multiplier/10))),
 			catch_up = false,
 
 			action = function(pos, node, active_object_count, active_object_count_wider)
