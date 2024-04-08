@@ -2527,8 +2527,8 @@ function mob_class:do_states(dtime)
 
 		self.runaway_timer = self.runaway_timer + 1
 
-		-- stop after 5 seconds or when at cliff -- TODO
-		if self.runaway_timer > 5
+		-- stop early after 3 or 2 seconds or when at cliff cos defaults start at 0 but on some states is 3
+		if self.runaway_timer > 4
 		or self.at_cliff
 		or self.order == "stand" then
 			self.runaway_timer = 0
