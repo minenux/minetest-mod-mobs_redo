@@ -4011,8 +4011,13 @@ function mobs:add_mob(pos, def)
 		effect(pos, 15, "tnt_smoke.png", 1, 2, 2, 15, 5)
 	end
 
+	-- use new texture if found
+	local new_texture = def.texture or ent.base_texture
+
 	if def.child then
 
+		ent.mommy_tex = new_texture -- how baby looks when grown
+		ent.base_texture = new_texture
 		local textures = ent.base_texture
 
 		-- using specific child texture (if found)
@@ -4046,6 +4051,12 @@ function mobs:add_mob(pos, def)
 		})
 
 		ent.child = true
+	-- if not child set new texture
+	elseif def.texture then
+
+		ent.base_texture = new_texture
+
+		mob:set_properties({textures = new_texture})
 	end
 
 	if def.owner then
