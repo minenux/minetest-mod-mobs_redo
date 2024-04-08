@@ -151,6 +151,7 @@ local creatura = minetest.get_modpath("creatura") and
 
 
 mobs.mob_class = {
+	state = "stand",
 	stepheight = 1.1,
 	fly_in = "air",
 	owner = "",
