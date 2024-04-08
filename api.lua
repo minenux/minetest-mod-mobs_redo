@@ -2033,12 +2033,12 @@ end
 local function is_peaceful_player(player)
 
 	-- main setting enabled
-	if peaceful_player_enabled and player:is_player() then
+	if is_player(player) then
 
 		local player_name = player:get_player_name()
 
 		-- player priv enabled
-		if player_name and minetest.check_player_privs(player_name, "peaceful_player") then
+		if player_name and peaceful_player_enabled and  minetest.check_player_privs(player_name, "peaceful_player") then
 			return true
 		end
 	end
@@ -2243,7 +2243,7 @@ function mob_class:follow_flop()
 		for n = 1, #players do
 
 			if players[n] then
-				if players[n]:is_player() then
+				if is_player(players[n]) then
 					if not is_invisible(self, players[n]:get_player_name())
 					and get_distance(players[n]:get_pos(), s) < self.view_range then
 						self.following = players[n]
@@ -2554,17 +2554,11 @@ function mob_class:do_states(dtime)
 		local dist = p and get_distance(p, s) or 500
 
 		-- stop attacking if player out of range or invisible
-		if dist > self.view_range
-		or not self.attack
-		or not self.attack:get_pos()
-		or self.attack:get_hp() <= 0
-		or (is_player(self.attack)
-		and is_invisible(self, self.attack:get_player_name())) then
-
+		if dist > self.view_range and not self.attack and not is_player(self.attack) then
+			if not self.attack:get_pos() or self.attack:get_hp() <= 0 and is_invisible(self, self.attack:get_player_name()) then
 --print(" ** stop attacking **", self.name, self.health, dist, self.view_range)
-
-			self:stop_attack()
-
+				self:stop_attack()
+			end
 			return
 		end
 
