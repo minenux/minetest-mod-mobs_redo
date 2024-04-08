@@ -1227,7 +1227,7 @@ function mob_class:do_env_damage()
 		end
 
 	-- lava damage
-	elseif self.lava_damage ~= 0 and nodef.groups.lava  then
+	elseif self.lava_damage ~= 0 and self:is_inside("group:lava") then -- nodef.groups.lava  then
 
 		self.health = self.health - self.lava_damage
 
