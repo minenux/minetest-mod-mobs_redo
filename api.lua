@@ -1185,7 +1185,7 @@ function mob_class:is_inside(itemtable)
 		vector.offset(pos, cb[4], cb[5], cb[6]), itemtable)
 
 	if nn and #nn > 0 then return true else return false end
-+end
+end
 
 
 -- function do_env_damage environmental damage (water, lava, fire, light etc.)
