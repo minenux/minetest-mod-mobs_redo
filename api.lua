@@ -4518,6 +4518,16 @@ function mobs:register_egg(mob, desc, background, addegg, no_creative)
 			"^[mask:mobs_chicken_egg_overlay.png)"
 	end
 
+	-- does mob/entity exist
+	local is_mob = minetest.registered_entities[mob]
+
+	if not is_mob then
+		print("[Mobs Redo] Spawn Egg cannot be created for " .. mob)
+		return
+	end
+	-- these are only created for animals and npc mobs, not monsters TODO
+	-- if is_mob.type ~= "monster" then return end
+
 	-- register new spawn egg containing mob information (cannot be stacked)
 	minetest.register_craftitem(mob .. "_set", {
 
