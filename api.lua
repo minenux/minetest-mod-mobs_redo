@@ -183,7 +183,7 @@ mobs.mob_class = {
 	walk_chance = 50,
 	stand_chance = 30,
 	attack_chance = 5,
-	attack_patience = 11
+	attack_patience = 11,
 	passive = false,
 	blood_amount = 5,
 	blood_texture = "mobs_blood.png",
@@ -227,7 +227,7 @@ local mob_class = mobs.mob_class -- Compatibility
 local mob_class_meta = {__index = mob_class}
 
 
--- play sound
+-- function mob_sound play sound
 function mob_class:mob_sound(sound)
 
 	if not sound then return end
@@ -247,7 +247,7 @@ function mob_class:mob_sound(sound)
 end
 
 
--- attack player/mob
+-- function do_class attack player/mob
 function mob_class:do_attack(player)
 
 	if self.state == "attack" then
@@ -283,7 +283,7 @@ local function is_player(player)
 end
 
 
--- collision function based on jordan4ibanez' open_ai mod
+-- function collision  based on jordan4ibanez' open_ai mod
 function mob_class:collision()
 
 	local pos = self.object:get_pos() ; if not pos then return {0, 0} end
@@ -345,7 +345,7 @@ local function check_for(look_for, look_inside)
 end
 
 
--- move mob in facing direction
+-- function set_velocity move mob in facing direction
 function mob_class:set_velocity(v)
 
 	-- halt mob if it has been ordered to stay
@@ -390,13 +390,13 @@ function mob_class:set_velocity(v)
 	self.object:set_velocity(new_vel)
 end
 
--- global version of above function
+-- global version of above function [deprecated]
 function mobs:set_velocity(entity, v)
 	mob_class.set_velocity(entity, v)
 end
 
 
--- calculate mob velocity
+-- function get_velocity calculate mob velocity
 function mob_class:get_velocity()
 
 	local v = self.object:get_velocity()
@@ -407,7 +407,7 @@ function mob_class:get_velocity()
 end
 
 
--- set and return valid yaw
+-- function set_yaw set and return valid yaw
 function mob_class:set_yaw(yaw, delay)
 
 	if not yaw or yaw ~= yaw then
@@ -442,7 +442,7 @@ function mobs:yaw(entity, yaw, delay)
 end
 
 
--- set defined animation
+-- function set_animation set defined animation
 function mob_class:set_animation(anim, force)
 
 	if not self.animation or not anim then return end
@@ -487,6 +487,7 @@ function mob_class:set_animation(anim, force)
 		0, self.animation[anim .. "_loop"] ~= false)
 end
 
+-- global function to set mob animation [deprecated
 function mobs:set_animation(entity, anim)
 	entity.set_animation(entity, anim)
 end
@@ -630,7 +631,7 @@ local function ray_line_of_sight(self, pos1, pos2)
 	return true
 end
 
-
+-- function line_of_sight autodetectyion with raycasting support if any
 function mob_class:line_of_sight(pos1, pos2, stepsize)
 
 	if minetest.raycast then -- only use if minetest 5.0 is detected
@@ -640,12 +641,13 @@ function mob_class:line_of_sight(pos1, pos2, stepsize)
 	return line_of_sight(self, pos1, pos2, stepsize)
 end
 
--- global function
+-- global function line of sight [deprecated]
 function mobs:line_of_sight(entity, pos1, pos2, stepsize)
 	return entity:line_of_sight(pos1, pos2, stepsize)
 end
 
 
+-- function attempt_flight_correction internal
 function mob_class:attempt_flight_correction(override)
 
 	if self:flight_check() and override ~= true then return true end
@@ -676,7 +678,7 @@ function mob_class:attempt_flight_correction(override)
 end
 
 
--- are we flying in what we are suppose to? (taikedz)
+-- function flight_check - are we flying in what we are suppose to? (taikedz)
 function mob_class:flight_check()
 
 	local def = minetest.registered_nodes[self.standing_in]
@@ -699,8 +701,8 @@ function mob_class:flight_check()
 end
 
 
--- turn mob to face position
-local function yaw_to_pos(self, target, rot)
+-- function yaw_to_pos turn mob to face position
+function mob_class:yaw_to_pos(target, rot)
 
 	rot = rot or 0
 
@@ -717,12 +719,13 @@ local function yaw_to_pos(self, target, rot)
 	return yaw
 end
 
+-- global [deprecated]
 function mobs:yaw_to_pos(self, target, rot)
-	return yaw_to_pos(self, target, rot)
+	return self:yaw_to_pos(target, rot)
 end
 
 
--- if stay near set then periodically check for nodes and turn towards them
+-- function do_stay_near if stay near set then periodically check for nodes and turn towards them
 function mob_class:do_stay_near()
 
 	if not self.stay_near then return false end
@@ -748,7 +751,7 @@ function mob_class:do_stay_near()
 		return false
 	end
 
-	yaw_to_pos(self, nearby_nodes[random(#nearby_nodes)])
+	self:yaw_to_pos(nearby_nodes[random(#nearby_nodes)])
 
 	self:set_animation("walk")
 
@@ -794,6 +797,7 @@ local function effect(
 	})
 end
 
+-- global function effect
 function mobs:effect(
 		pos, amount, texture, min_size, max_size, radius, gravity, glow, fall)
 
@@ -808,7 +812,7 @@ local HORNY_AGAIN_TIME = 60 * 5 -- 5 minutes
 local CHILD_GROW_TIME = 60 * 20 -- 20 minutes
 
 
--- update nametag and infotext
+-- function update_tag update nametag and infotext
 function mob_class:update_tag()
 
 	local col
@@ -858,7 +862,7 @@ function mob_class:update_tag()
 end
 
 
--- drop items
+-- function item_drop drop items
 function mob_class:item_drop()
 
 	-- no drops if disabled by setting or mob is child
@@ -941,7 +945,7 @@ function mob_class:item_drop()
 end
 
 
--- remove mob and descrease counter
+-- TODO make object class function - remove mob and descrease counter
 local function remove_mob(self, decrease)
 
 	self.object:remove()
@@ -962,7 +966,7 @@ function mobs:remove(self, decrease)
 end
 
 
--- check if mob is dead or only hurt
+-- function check_for_deathcheck if mob is dead or only hurt
 function mob_class:check_for_death(cmi_cause)
 
 	-- We dead already
@@ -1087,6 +1091,11 @@ local function node_ok(pos, fallback)
 	return minetest.registered_nodes[(fallback or mobs.fallback_node)]
 end
 
+-- global function node_ok
+function mobs:node_ok(pos, fallback)
+	return node_ok(pos, fallback)
+end
+
 
 -- Returns true is node can deal damage to self
 function mobs:is_node_dangerous(mob_object, nodename)
@@ -1118,7 +1127,7 @@ local function is_node_dangerous(mob_object, nodename)
 end
 
 
--- is mob facing a cliff
+-- function is_at_cliff is mob facing a cliff
 function mob_class:is_at_cliff()
 
 	if self.driver or self.fear_height == 0 then -- 0 for no falling protection!
@@ -1157,7 +1166,29 @@ function mob_class:is_at_cliff()
 end
 
 
--- environmental damage (water, lava, fire, light etc.)
+-- function is_inside check for nodes or groups inside mob
+function mob_class:is_inside(itemtable)
+
+	local cb
+	if self.object:get_properties() then
+		if self.object:get_properties().collisionbox then
+			cb = self.object:get_properties().collisionbox
+		else
+			cb = self.collisionbox
+		end
+	else 
+		cb = self.collisionbox
+	end
+	local pos = self.object:get_pos()
+	local nn = minetest.find_nodes_in_area(
+		vector.offset(pos, cb[1], cb[2], cb[3]),
+		vector.offset(pos, cb[4], cb[5], cb[6]), itemtable)
+
+	if nn and #nn > 0 then return true else return false end
++end
+
+
+-- function do_env_damage environmental damage (water, lava, fire, light etc.)
 function mob_class:do_env_damage()
 
 	self:update_tag()
@@ -1301,7 +1332,7 @@ function mob_class:do_env_damage()
 end
 
 
--- jump if facing a solid node (not fences or gates)
+-- function do_jump jump if facing a solid node (not fences or gates)
 function mob_class:do_jump()
 
 	local vel = self.object:get_velocity() ; if not vel then return false end
@@ -1417,7 +1448,7 @@ local function is_invisible(self, player_name)
 end
 
 
--- should mob follow what I'm holding ?
+-- function follow_holding should mob follow what I'm holding ?
 function mob_class:follow_holding(clicker)
 
 	if is_invisible(self, clicker:get_player_name()) then
@@ -1435,7 +1466,7 @@ function mob_class:follow_holding(clicker)
 end
 
 
--- find two animals of same type and breed if nearby and horny
+-- function breed find two animals of same type and breed if nearby and horny
 function mob_class:breed()
 
 	-- child takes a long time before growing into adult
@@ -1543,8 +1574,8 @@ function mob_class:breed()
 				local pos2 = ent.object:get_pos()
 
 				-- Have mobs face one another
-				yaw_to_pos(self, pos2)
-				yaw_to_pos(ent, self.object:get_pos())
+				self:yaw_to_pos(pos2)
+				ent:yaw_to_pos(self.object:get_pos())
 
 				self.hornytimer = HORNY_TIME + 1
 				ent.hornytimer = HORNY_TIME + 1
@@ -1639,7 +1670,7 @@ function mob_class:breed()
 end
 
 
--- find and replace what mob is looking for (grass, wheat etc.)
+-- function replace find and replace what mob is looking for (grass, wheat etc.)
 function mob_class:replace(pos)
 
 	local vel = self.object:get_velocity()
@@ -1696,7 +1727,7 @@ function mob_class:replace(pos)
 end
 
 
--- check if daytime and also if mob is docile during daylight hours
+-- function day_docile check if daytime and also if mob is docile during daylight hours
 function mob_class:day_docile()
 
 	if self.docile_by_day == false then
@@ -1751,6 +1782,7 @@ end
 
 local pathfinder_mod = minetest.get_modpath("pathfinder")
 
+-- function smart_mobs
 -- path finding and smart mob routine by rnd,
 -- line_of_sight and other edits by Elkien3
 function mob_class:smart_mobs(s, p, dist, dtime)
@@ -2015,7 +2047,7 @@ local function is_peaceful_player(player)
 end
 
 
--- general attack function for all mobs
+-- function general_attack function for all mobs
 function mob_class:general_attack()
 
 	-- return if already attacking, passive or docile during day
@@ -2042,8 +2074,7 @@ function mob_class:general_attack()
 			or self.attack_players == false
 			or (self.owner and self.type ~= "monster")
 			or is_invisible(self, objs[n]:get_player_name())
-			or (self.specific_attack
-					and not check_for("player", self.specific_attack)) then
+			or (self.specific_attack and not check_for("player", self.specific_attack)) then
 				objs[n] = nil
 --print("- pla", n)
 			end
@@ -2055,10 +2086,8 @@ function mob_class:general_attack()
 		-- monsters attack all creatura mobs, npc and animals will only attack
 		-- if the animal owner is currently being attacked by creatura mob
 		if self.name == ent.name
-		or (self.type ~= "monster"
-			and self.owner ~= (ent._target and ent._target:get_player_name() or "."))
-		or (self.specific_attack
-			and not check_for(ent.name, self.specific_attack)) then
+		or (self.type ~= "monster" and self.owner ~= (ent._target and ent._target:get_player_name() or "."))
+		or (self.specific_attack and not check_for(ent.name, self.specific_attack)) then
 
 			objs[n] = nil
 --print("-- creatura", ent.name)
@@ -2072,8 +2101,7 @@ function mob_class:general_attack()
 			or (not self.attack_animals and ent.type == "animal")
 			or (not self.attack_monsters and ent.type == "monster")
 			or (not self.attack_npcs and ent.type == "npc")
-			or (self.specific_attack
-					and not check_for(ent.name, self.specific_attack)) then
+			or (self.specific_attack and not check_for(ent.name, self.specific_attack)) then
 				objs[n] = nil
 --print("- mob", n, self.name, ent.name)
 			end
@@ -2117,7 +2145,7 @@ function mob_class:general_attack()
 end
 
 
--- find someone to runaway from
+-- function do_runaway_from find someone to runaway from
 function mob_class:do_runaway_from()
 
 	if not self.runaway_from then
@@ -2177,7 +2205,7 @@ function mob_class:do_runaway_from()
 
 	if min_player then
 
-		yaw_to_pos(self, min_player:get_pos(), 3)
+		self:yaw_to_pos(min_player:get_pos(), 3)
 
 		self.state = "runaway"
 		self.runaway_timer = 3
@@ -2191,7 +2219,7 @@ function mob_class:do_runaway_from()
 
 	if objs then
 
-		yaw_to_pos(self, objs, 3)
+		self:yaw_to_pos(objs, 3)
 
 		self.state = "runaway"
 		self.runaway_timer = 3
@@ -2200,7 +2228,7 @@ function mob_class:do_runaway_from()
 end
 
 
--- follow player if owner or holding item, if fish outta water then flop
+-- function follow_flop follow player if owner or holding item, if fish outta water then flop
 function mob_class:follow_flop()
 
 	-- find player to follow
@@ -2239,7 +2267,7 @@ function mob_class:follow_flop()
 	else
 		-- stop following player if not holding specific item or mob is horny
 		if self.following and is_player(self.following)
-		and (self:follow_holding(self.following) == false or self.horny) then
+		and (self.horny or not self:follow_holding(self.following)) then
 			self.following = nil
 		end
 
@@ -2265,7 +2293,7 @@ function mob_class:follow_flop()
 			if dist > self.view_range then
 				self.following = nil
 			else
-				yaw_to_pos(self, p)
+				self:yaw_to_pos(p)
 
 				-- anyone but standing npc's can move along
 				if dist >= self.reach
@@ -2316,7 +2344,7 @@ function mob_class:follow_flop()
 end
 
 
--- dogshoot attack switch and counter function
+-- function dogswitch dogshoot attack switch and counter function
 function mob_class:dogswitch(dtime)
 
 	-- switch mode not activated
@@ -2342,7 +2370,7 @@ function mob_class:dogswitch(dtime)
 end
 
 
--- stop attack
+-- function stop_attack
 function mob_class:stop_attack()
 
 	self.attack = nil
@@ -2357,7 +2385,7 @@ function mob_class:stop_attack()
 end
 
 
--- execute current state (stand, walk, run, attacks)
+-- function do_states execute current state (stand, walk, run, attacks)
 function mob_class:do_states(dtime)
 
 	local yaw = self.object:get_yaw() ; if not yaw then return end
@@ -2389,7 +2417,7 @@ function mob_class:do_states(dtime)
 					-- select position of random block to climb onto
 					lp = lp[random(#lp)]
 
-					yaw = yaw_to_pos(self, lp)
+					yaw = self:yaw_to_pos(lp)
 				end
 
 				self.pause_timer = 3
@@ -2421,7 +2449,7 @@ function mob_class:do_states(dtime)
 
 			-- look at any players nearby, otherwise turn randomly
 			if lp then
-				yaw = yaw_to_pos(self, lp)
+				yaw = self:yaw_to_pos(lp)
 			else
 				yaw = yaw + random(-0.5, 0.5)
 			end
@@ -2499,7 +2527,7 @@ function mob_class:do_states(dtime)
 
 		self.runaway_timer = self.runaway_timer + 1
 
-		-- stop after 5 seconds or when at cliff
+		-- stop after 5 seconds or when at cliff -- TODO
 		if self.runaway_timer > 5
 		or self.at_cliff
 		or self.order == "stand" then
@@ -2559,7 +2587,7 @@ function mob_class:do_states(dtime)
 
 		if self.attack_type == "explode" then
 
-			yaw_to_pos(self, p)
+			self:yaw_to_pos(p)
 
 			local node_break_radius = self.explosion_radius or 1
 			local entity_damage_radius = self.explosion_damage_radius
@@ -2710,7 +2738,7 @@ function mob_class:do_states(dtime)
 				p = {x = p1.x, y = p1.y, z = p1.z}
 			end
 
-			yaw_to_pos(self, p)
+			self:yaw_to_pos(p)
 
 			-- move towards enemy if beyond mob reach
 			if dist > (self.reach + (self.reach_ext or 0)) then
@@ -2802,7 +2830,7 @@ function mob_class:do_states(dtime)
 
 			local vec = {x = p.x - s.x, y = p.y - s.y, z = p.z - s.z}
 
-			yaw_to_pos(self, p)
+			self:yaw_to_pos(p)
 
 			self:set_velocity(0)
 
@@ -2849,7 +2877,7 @@ function mob_class:do_states(dtime)
 end
 
 
--- falling and fall damage
+-- function falling and fall damage
 function mob_class:falling(pos)
 
 	if self.fly or self.disable_falling then
@@ -2904,7 +2932,7 @@ end
 -- is Took Ranks mod active?
 local tr = minetest.get_modpath("toolranks")
 
--- deal damage and effects when mob punched
+-- function on_punch deal damage and effects when mob punched
 function mob_class:on_punch(hitter, tflp, tool_capabilities, dir, damage)
 
 	-- mob health check
@@ -3150,7 +3178,7 @@ function mob_class:on_punch(hitter, tflp, tool_capabilities, dir, damage)
 
 		local lp = hitter:get_pos()
 
-		yaw_to_pos(self, lp, 3)
+		self:yaw_to_pos(lp, 3)
 
 		self.state = "runaway"
 		self.runaway_timer = 0
@@ -3225,7 +3253,7 @@ local function clean_staticdata(self)
 end
 
 
--- get entity staticdata
+-- function mob_staticdata get entity staticdata
 function mob_class:mob_staticdata()
 
 	-- this handles mob count for mobs activated, unloaded, reloaded
@@ -3290,7 +3318,7 @@ function mob_class:mob_staticdata()
 end
 
 
--- activate mob and reload settings
+-- function mob_activate activate mob and reload settings
 function mob_class:mob_activate(staticdata, def, dtime)
 
 	-- if dtime == 0 then entity has just been created
@@ -3462,7 +3490,7 @@ function mob_class:mob_activate(staticdata, def, dtime)
 end
 
 
--- handle mob lifetimer and expiration
+-- function mob_expire handle mob lifetimer and expiration
 function mob_class:mob_expire(pos, dtime)
 
 	-- when lifetimer expires remove mob (except npc and tamed)
@@ -3501,7 +3529,7 @@ function mob_class:mob_expire(pos, dtime)
 end
 
 
--- get nodes mob is standing on/in, facing/above
+-- function get_nodes get nodes mob is standing on/in, facing/above
 function mob_class:get_nodes()
 
 	local pos = self.object:get_pos()
@@ -3545,7 +3573,7 @@ print("on: " .. self.standing_on
 end
 
 
--- main mob function
+-- function on_step main mob function
 function mob_class:on_step(dtime, moveresult)
 
 	if self.state == "die" then return end
@@ -3701,7 +3729,7 @@ function mob_class:on_step(dtime, moveresult)
 end
 
 
--- default function when mobs are blown up with TNT
+-- function on_blast default function when mobs are blown up with TNT
 function mob_class:on_blast(damage)
 
 --print("-- blast damage", damage)
@@ -4522,7 +4550,7 @@ function mobs:register_egg(mob, desc, background, addegg, no_creative)
 			and not minetest.is_protected(pos, placer:get_player_name()) then
 
 				if not minetest.registered_entities[mob] then
-					return
+					return -- TODO
 				end
 
 				pos.y = pos.y + 1
@@ -4790,7 +4818,7 @@ function mobs:protect(self, clicker)
 
 	pos.y = pos.y + self.collisionbox[2] + 0.5
 
-	effect(self.object:get_pos(), 25, "mobs_protect_particle.png", 0.5, 4, 2, 15)
+	effect(pos, 25, "mobs_protect_particle.png", 0.5, 4, 2, 15)
 
 	self:mob_sound("mobs_spell")
 
