@@ -32,6 +32,25 @@ the tenplus1 only works in last minetest, admins will not wants to constant upgr
 
 ## Changelog
 
+### pending next
+
+* Added self.homing so that arrows follow player when visible
+* Added support for Visual Harm 1ndicators mod to show health bars
+* Move mob and arrow entities to use initial_properties
+* Spawn eggs check if mob is available when creating
+* Used get/set_properties() within API for mob properties
+* Moved nametag variable to self._nametag
+
+### Version 1.60
+
+* Updated api txt documentation
+* Added entity:is_inside(itemtable) function (thx cora)
+* Added self.attack_patience value so mobs stop attacking unseen players
+* Tidied breeding function
+* Better MineClone2 / MineClonia support added
+* Tweaked and tidied code in places
+* Added self.node_damage flag which is true by default to enable damage_per_second node damage
+
 ### Version 1.57
 
 * Added 'injured' animation when mob hurt
