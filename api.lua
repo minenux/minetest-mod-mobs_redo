@@ -4546,11 +4546,16 @@ function mobs:register_egg(mob, desc, background, addegg, no_creative)
 						pointed_thing.under, under, placer, itemstack, pointed_thing)
 			end
 
-			if pos
-			and not minetest.is_protected(pos, placer:get_player_name()) then
+			if pos and not minetest.is_protected(pos, placer:get_player_name()) then
 
-				if not minetest.registered_entities[mob] then
-					return -- TODO
+				if active_limit > 0 and active_mobs >= active_limit then
+					if is_player(placer) then
+						minetest.chat_send_player(placer:get_player_name(),
+								S("Active Mob Limit Reached!")
+								.. "  (" .. active_mobs
+								.. " / " .. active_limit .. ")")
+					end
+					return
 				end
 
 				pos.y = pos.y + 1
@@ -4599,16 +4604,14 @@ function mobs:register_egg(mob, desc, background, addegg, no_creative)
 
 			if pos and not minetest.is_protected(pos, placer:get_player_name()) then
 
-				if not minetest.registered_entities[mob] then
-					return
-				end
-
 				-- have we reached active mob limit
 				if active_limit > 0 and active_mobs >= active_limit then
-					minetest.chat_send_player(placer:get_player_name(),
-							S("Active Mob Limit Reached!")
-							.. "  (" .. active_mobs
-							.. " / " .. active_limit .. ")")
+					if is_player(placer) then
+						minetest.chat_send_player(placer:get_player_name(),
+								S("Active Mob Limit Reached!")
+								.. "  (" .. active_mobs
+								.. " / " .. active_limit .. ")")
+					end
 					return
 				end
 
