@@ -1171,19 +1171,20 @@ end
 function mob_class:is_inside(itemtable)
 
 	local cb
-	if self.object:get_properties() then
+	if not self.collisionbox then
 		if self.object:get_properties().collisionbox then
 			cb = self.object:get_properties().collisionbox
 		else
-			cb = self.collisionbox
+			return false
 		end
-	else 
+	else
 		cb = self.collisionbox
 	end
 	local pos = self.object:get_pos()
+	local vo1 = {}
 	local nn = minetest.find_nodes_in_area(
-		vector.offset(pos, cb[1], cb[2], cb[3]),
-		vector.offset(pos, cb[4], cb[5], cb[6]), itemtable)
+		{x = pos.x + cb[1], y = pos.y + cb[2], z = pos.z + cb[3]},
+		{x = pos.x + cb[4], y = pos.y + cb[5], z = pos.z + cb[6]}, itemtable)
 
 	if nn and #nn > 0 then return true else return false end
 end
