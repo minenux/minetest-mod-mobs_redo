@@ -2561,6 +2561,8 @@ function mob_class:do_states(dtime)
 --print(" ** stop attacking **", self.name, self.health, dist, self.view_range)
 				self:stop_attack()
 			end
+			if not p then
+				self:stop_attack()
 			return
 		end
 
