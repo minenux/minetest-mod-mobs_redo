@@ -2560,39 +2560,44 @@ function mob_class:do_states(dtime)
 			if not self.attack:get_pos() or self.attack:get_hp() <= 0 and is_invisible(self, self.attack:get_player_name()) then
 --print(" ** stop attacking **", self.name, self.health, dist, self.view_range)
 				self:stop_attack()
+				return
 			end
 			if not p then
 				self:stop_attack()
-			return
+				return
+			end
 		end
 
 		-- check enemy is in sight
-		local in_sight = self:line_of_sight(
-			{x = s.x, y = s.y + 0.5, z = s.z},
-			{x = p.x, y = p.y + 0.5, z = p.z})
+		local in_sight
+		if p then
+			in_sight = self:line_of_sight(
+				{x = s.x, y = s.y + 0.5, z = s.z},
+				{x = p.x, y = p.y + 0.5, z = p.z})
 
-		-- stop attacking when enemy not seen for 11 seconds
-		if not in_sight then
+			-- stop attacking when enemy not seen for 11 seconds
+			if not in_sight then
 
-			self.target_time_lost = (self.target_time_lost or 0) + dtime
+				self.target_time_lost = (self.target_time_lost or 0) + dtime
 
-			if self.target_time_lost > self.attack_patience then
-				self:stop_attack()
+				if self.target_time_lost > self.attack_patience then
+					self:stop_attack()
+				end
+			else
+				self.target_time_lost = 0
 			end
-		else
-			self.target_time_lost = 0
 		end
 
 		if self.attack_type == "explode" then
 
-			self:yaw_to_pos(p)
+			if p then self:yaw_to_pos(p) end
 
 			local node_break_radius = self.explosion_radius or 1
 			local entity_damage_radius = self.explosion_damage_radius
 					or (node_break_radius * 2)
 
 			-- look a little higher to fix raycast
-			s.y = s.y + 0.5 ; p.y = p.y + 0.5
+			if p then s.y = s.y + 0.5 ; p.y = p.y + 0.5 end
 
 			-- start timer when in reach and line of sight
 			if not self.v_start
