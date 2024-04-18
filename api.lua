@@ -2741,7 +2741,7 @@ function mob_class:do_states(dtime)
 				p = {x = p1.x, y = p1.y, z = p1.z}
 			end
 
-			self:yaw_to_pos(p)
+			if p then self:yaw_to_pos(p) end
 
 			-- move towards enemy if beyond mob reach
 			if dist > (self.reach + (self.reach_ext or 0)) then
@@ -2785,7 +2785,7 @@ function mob_class:do_states(dtime)
 
 				self:set_velocity(0)
 
-				if self.timer > 1 then
+				if self.timer > 1 and p then
 
 					-- no custom attack or custom attack returns true to continue
 					if not self.custom_attack
